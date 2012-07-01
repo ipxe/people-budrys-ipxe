@@ -218,7 +218,7 @@ static int rhine_alloc_rings ( struct rhine_nic *rhn )
 	rhn->tx_cons = 0;
 	rhn->tx_ring = malloc_dma ( RHINE_TXDESC_SIZE, RHINE_RING_ALIGN );
 	if ( ! rhn->tx_ring )
-		return -ENOMEM;
+		goto err_tx_ring_alloc;
 
 	memset ( rhn->tx_ring, 0, RHINE_TXDESC_SIZE );
 
@@ -232,6 +232,10 @@ static int rhine_alloc_rings ( struct rhine_nic *rhn )
 	writel ( virt_to_bus ( rhn->tx_ring ), rhn->regs + RHINE_TXQUEUE_BASE );
 
 	return 0;
+
+err_tx_ring_alloc:
+	free_dma ( rhn->rx_ring, RHINE_RXDESC_SIZE );
+	return -ENOMEM;	
 }
 
 static int rhine_refill_rx ( struct rhine_nic *rhn )
@@ -355,6 +359,13 @@ static void rhine_close ( struct net_device *netdev ) {
 	rhn->tx_ring = NULL;
 	rhn->tx_prod = 0;
 	rhn->tx_cons = 0;
+
+	/* Disable interrupts */
+	writeb ( 0, RHINE_IMR0 );
+	writeb ( 0, RHINE_IMR1 );
+
+	/* Disable transmit and receive */
+	writeb ( RHINE_CR0_STOPNIC, rhn->regs + RHINE_CR0 );
 }
 
 /**
