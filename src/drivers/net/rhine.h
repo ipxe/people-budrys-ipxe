@@ -214,7 +214,7 @@ struct rhine_nic {
 	struct net_device *netdev;
 
 	struct rhine_descriptor *rx_ring;
-	struct io_buffer *rx_buffs[RHINE_TXDESC_NUM];
+	struct io_buffer *rx_buffs[RHINE_RXDESC_NUM];
 	unsigned int rx_prod;
 	unsigned int rx_cons;
 

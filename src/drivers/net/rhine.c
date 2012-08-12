@@ -495,8 +495,18 @@ static void rhine_poll ( struct net_device *netdev ) {
 static void rhine_irq ( struct net_device *netdev, int enable ) {
 	struct rhine_nic *nic = netdev->priv;
 
-	DBGC ( nic, "RHINE %p does not yet support interrupts\n", nic );
-	( void ) enable;
+	DBGC ( nic, "RHINE %p interrupts %s\n", nic,
+	    enable ? "enable" : "disable");
+
+	if (enable) {
+		/* Enable interrupts */
+		writeb ( 0xff, rhn->regs + RHINE_IMR0 );
+		writeb ( 0xff, rhn->regs + RHINE_IMR1 );
+	} else {
+		/* Disable interrupts */
+		writeb ( 0, rhn->regs + RHINE_IMR0 );
+		writeb ( 0, rhn->regs + RHINE_IMR1 );
+	}
 }
 
 /** Rhine network device operations */
